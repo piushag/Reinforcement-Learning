@@ -1,0 +1,415 @@
+---
+title: "Homework 5R"
+author: "Piusha Gullapalli"
+output:
+  pdf_document:
+    fig_height: 3
+    fig_width: 5
+  word_document:
+    fig_height: 3
+    fig_width: 5
+  html_document:
+    fig_height: 3
+    fig_width: 5
+---
+
+## North Carolina births
+
+In 2004, the state of North Carolina released a large data set containing 
+information on births recorded in this state. This data set is useful to 
+researchers studying **the relation between habits and practices of expectant 
+mothers and the birth of their children**. We will work with a random sample of 
+observations from this data set.
+
+## Exploratory analysis
+
+Load the `nc` data set into our workspace.
+
+```{r, include=FALSE}
+require(mosaic)
+```
+
+```{r load-data}
+download.file("http://www.openintro.org/stat/data/nc.RData", destfile = "nc.RData")
+load("nc.RData")
+```
+
+We have observations on 13 different variables, some categorical and some 
+numerical. The variable descriptions are given below.
+
+variable         | description
+---------------- | -----------
+`fage`           | father's age in years.
+`mage`           | mother's age in years.
+`mature`         | maturity status of mother.
+`weeks`          | length of pregnancy in weeks.
+`premie`         | whether the birth was classified as premature (premie) or full-term.
+`visits`         | number of hospital visits during pregnancy.
+`marital`        | whether mother is `married` or `not married` at birth.
+`gained`         | weight gained by mother during pregnancy in pounds.
+`weight`         | weight of the baby at birth in pounds.
+`lowbirthweight` | whether baby was classified as low birthweight (`low`) or not (`not low`).
+`gender`         | gender of the baby, `female` or `male`.
+`habit`          | status of the mother as a `nonsmoker` or a `smoker`.
+`whitemom`       | whether mom is `white` or `not white`.
+
+
+As a first step in the analysis, we should consider summaries of the data. This
+can be done using the `summary` command:
+
+```{r summary}
+summary(nc)
+```
+
+
+Plotting the data is a useful first step because it helps 
+us quickly visualize trends, identify strong associations, and develop research questions.
+
+Make a histogram of `weeks`, the length of each pregnancy in weeks.
+
+```{r}
+histogram(~weeks, data=nc, nint=20)
+```
+
+
+# Part 1. Inference
+
+1. What is the **sampling distribution** for the mean of `weeks`?
+
+SOLUTION:
+
+Size of sample : 1000
+
+Standard deviation: 2.931553
+
+Sample mean: 38.33 weeks
+```{r}
+lengths(nc)
+sd(~weeks, data=nc, na.rm=TRUE)
+```
+
+
+The human pregnancies typically last 38 weeks. Use $\alpha=0.05$ in each case.
+
+Example 1:
+
+(a) Test the hypothesis that the mean duration of pregnancies is not equal to 38 weeks. What is your decision?
+
+```{r}
+tstar <- qt(.975, df=997)
+t.test(~ weeks, data=nc, alternative="two.sided", mu=38)
+```
+
+Looking at p-value what is your decision?
+
+--ANSWER: Since the p-value is close to 0 and less than alpha 0.05, we can reject the null hypothesis.
+
+Now look at the Confidence Interval and state your decision base on the CI.
+A two-sided hypothesis test at significance level alpha is equivalent to using a confidence interval at (1-alpha)*100% confidence level and looking to see if the hypothesized value is in the confidence interval. If it is, you cannot reject the null hypothesis. If it isn't, you can reject the null.
+
+--ANSWER: We can reject the null hypothesis since it is not in the interval.
+
+Example 2:
+
+(b) Test the hypothesis that the mean duration of pregnancies is greater than 38 year.What is your decision?
+
+```{r}
+m <- mean(~ weeks, data=nc, na.rm=TRUE)
+s <- sd(~ weeks, data=nc, na.rm=TRUE)
+tstar <- qt(.95, df=997)
+t <- (m-38)/(s/sqrt(998))
+t.test(~ weeks, data=nc, alternative="greater", mu=38)
+```
+
+Looking at p-value what is your decision?
+
+--ANSWER: The p-value is close to 0 and less than 0,05, we can reject the null hypothesis.
+
+
+Now look at the Confidence Interval or rather LCB. What is your decision?
+--ANSWER: We can reject the null hypothesis.
+
+Note:
+For a one-sided test at significance level alpha you need a confidence interval at (1 - 2alpha)*100% and again check for the hypothesized value in the confidence interval. If it is in the interval you cannot reject the null. In addition, the confidence interval must either be entirely below or above the hypothesized value (depending on situation) to reject the null. You can also obtain a 1-sided confidence interval (in fact called a 'confidence bound') - R does this automatically, as seen. You can of course calculate the proper interval, or use the automatic  option just to change your alpha. Then your CI will be correct, the Ha and p-value will not be correct. We rewrite the chunk above to get a proper CI. What is your decision?
+
+
+```{r}
+# Method 1
+t.test(~weeks,data=nc,
+       alternative = "two.sided",
+       mu = 38,
+       conf.level = 0.90)
+```
+
+```{r}
+# Method 2
+m <- mean(~ weeks, data=nc, na.rm=TRUE)
+s <- sd(~ weeks, data=nc, na.rm=TRUE)
+tstar1 <- qt(.95, df=997)
+SE=s/sqrt(998)
+
+c(m -tstar1*SE, m+tstar*SE)  
+m +c(-1,1)*tstar1*SE
+
+```
+We can still reject the null hypothesis.
+
+Example 3:
+
+(c) Test the hypothesis that the mean duration of pregnancies is less than 38 weeks. What is your decision?
+
+
+```{r}
+tstar <- qt(.05, df=997)
+t.test(~ weeks, data=nc, alternative="less", mu=38)
+```
+--ANSWER: Since the p-value is close to 1 and greater than 0.05, we cannot reject the null hypothesis.
+
+2. Now create the matching CI.What is your decision?
+
+SOLUTION:
+
+```{r}
+t.test(~weeks,data=nc,
+       alternative = "less",
+       mu = 38,
+       conf.level = 0.90)
+```
+
+38 is less than 38.45367. And p value is close to 1. We cannot reject the null hypothesis.
+
+3. Write down and check that the conditions necessary for inference are satisfied.
+
+
+SOLUTION:
+
+Conditions for inference:
+
+1. The data is randomly sampled.
+
+2. The observations are independent.
+
+3. The sampling distribution is approximately normal.
+
+
+4. On your own.
+
+Use $\alpha=0.1$ in each case.
+
+(a) Test the hypothesis that the mean age of a mother is less than 27 years old. What is your decision?
+
+SOLUTION:
+
+```{r}
+t.test(~mage,data=nc,
+       alternative = "less",
+       mu = 27,
+       conf.level = 0.90)
+```
+
+The p-value is greater than alpha of 0.1. We cannot reject the null hypothesis. 
+
+(b) Calculate a 95% confidence interval for the average age of a mother and interpret it in context.
+ 
+SOLUTION:
+ 
+```{r}
+t.test(~mage,data=nc,
+       alternative = "two.sided",
+       mu = 27,
+       conf.level = 0.95)
+```
+27 lies within the range, cannot reject the null hypothesis.
+
+
+# Part 2. Test Population Proportions and Counts
+
+# Testing one sample proportion to population value - z test for one sample proportion
+
+Example 4:
+
+Birth rate for boys in hospital 
+We know that 51.7% of babies born are male in the population.
+We observed that 313 boys were born to 550 singleton deliveries in one hospital
+Is this different that would be expected by chance?
+
+```{r}
+y <- 313; n <- 550; phat <- y/n; phat
+nullp <- 0.517
+sdp <- sqrt(nullp*(1-nullp)/n); sdp
+onesidep <- 1-pnorm(phat, mean=nullp, sd=sdp); onesidep
+twosidep <- 2*onesidep; twosidep
+```
+
+or we can carry out the exact test (not described by the book):
+
+```{r}
+binom.test(y, n, p=nullp)
+```
+
+
+5. What can we conclude for the above example (Example 4)? 
+
+SOLUTION:
+
+The p value is less than alpha of 0.05, we can reject the null hypothesis.
+
+
+# Testing for a difference in proportions- Two sample z-test for a difference in proportions
+
+Example 5:
+
+Use data from the NYC Maternal Infant HIV Transmission Study
+Two qualitative variables (AZT use & Transmission)
+A prospective study of HIV transmission to infants among 321 mothers.
+Of the 47 women on AZT, 6 transmitted and of the 274 mothers who did not take AZT, 64 transmitted.
+
+```{r}
+n1 <- 47; y1 <- 6
+n2 <- 274; y2 <- 64
+ppooled <- (y1+y2)/(n1+n2); ppooled
+sepooled <- sqrt(ppooled*(1-ppooled)/n1 + ppooled*(1-ppooled)/n2); sepooled
+z <- (y1/n1 - y2/n2)/sepooled; z
+pval <- 2*(1-pnorm(z, lower.tail = FALSE)); pval
+```
+
+
+6. Was AZT effective? Based on what information? Make sure that you read the correct p-value.
+
+SOLUTION:
+
+The p-value of 0.104 is greater than alpha of 0.05. We cannot reject the null hypothesis. Cannot say it was effective.
+
+In the previous example of MTC HIV transmission, we had counts
+If instead, we had counts and proportions we could use this code to calculate the standard error of the difference and create a confidence interval.
+
+```{r}
+n1 <- 47; p1 <- 0.13
+n2 <- 274; p2 <- 0.23
+sediff <- sqrt(p1*(1-p1)/n1 + p2*(1-p2)/n2); sediff
+(p2 - p1) + c(-1.96, 1.96)*sediff
+```
+
+7. Was AZT effective? Does the result match the conclusion in Question 6?
+
+SOLUTION:
+
+
+Since the interval contains 0, we cannot reject the null hypothesis. 
+
+The result matches with the conclusion in Question 6.
+
+# Part 3. Test Population Menas
+
+Example 6: 
+
+Acquire the WNBA & NBA datafile
+
+```{r}
+bball <- read.csv("http://www3.amherst.edu/~jjeneralczuk/Rintro/Basket.csv")
+glimpse(bball)
+```
+
+Take a peek at the data
+
+```{r}
+names (bball)
+head (bball)
+
+```
+
+Look more closely at the variables
+
+```{r}
+
+favstats (~HEIGHTIN |GENDER, data=bball)
+favstats (~WEIGHTLB |GENDER, data=bball)
+
+histogram (~WEIGHTLB |GENDER, data=bball)
+histogram (~HEIGHTIN |GENDER, data=bball)
+
+```
+
+
+## Comparing one group mean to population - a one sample t-test
+
+Are Women in WNBA taller than US women in general?
+To answer this question we need to compare the sample of WNBA heights to NHANES mean height which has population values of: (mu=63.75, sd=3.423)
+
+```{r}
+mu=63.75
+sd=3.423
+womenonlyds <- filter(bball, GENDER=="Female")
+xpnorm(c(mu-3*sd, mu-2*sd, mu-sd, mu+sd, mu+2*sd, mu+3*sd), mean=mu, sd=sd)
+t.test(womenonlyds$HEIGHTIN, alternative="greater", mu=63.75, data=womenonlyds)
+
+```
+
+8. What do we conclude?  Are women playing professional basketball taller than American women?
+
+SOLUTION:
+
+Since the p value is close to zero, and less than 0.05, we can reject the null hypothesis.
+Suggests that women playing professional basketball taller than American women.
+
+
+
+## Comparing two groups to each other - a two Sample independent t-test
+
+If people who play basketball tend to be exceptionally tall would we expect women playing professional basketball to be as tall as the men?
+
+Using the bball data we can ask if women in WNBA different in terms of men in NBA?
+
+```{R}
+t.test(HEIGHTIN ~ GENDER, data=bball) # Unpooled
+t.test(HEIGHTIN ~ GENDER, var.equal=TRUE, data=bball)   # Pooled
+bwplot(GENDER ~ HEIGHTIN, data=bball)
+```
+
+(We went over 2 independent t-tests , one assumes equal variance like the test above. If you don't include var.equal=TRUE you will have Welch test )
+
+9. Are there difference in the heights of men and women professional basketball players?
+
+SOLUTION:
+
+Looking at the p value which is close to 0, we can reject the null hypothesis.
+Suggests that the true difference in means between Female and Male is not equal to 0.
+
+
+## Comparing Groups when data is paired - Dependent t-test using difference scores
+
+Example 6:
+
+This is a special case of data. 
+
+We are not comparing the mean of one group vs. another. We have the same group of people over time with matched data.  Paired data can also come from different people (twins, siblings, etc.), the unique aspect is that two numbers belong together.
+For this analysis we will be using data from National Education Longitudinal Study (NELS).  A nationally representative sample of eighth-graders were first surveyed in the spring of 1988. A sample of these respondents were then resurveyed through four follow-ups in 1990, 1992, 1994, and 2000. On the questionnaire, students reported on a range of topics including: school, work, and home experiences; educational resources and support; the role in education of their parents and peers; neighborhood characteristics; educational and occupational aspirations; and other student perceptions. Additional topics included self-reports on smoking, alcohol and drug use and extracurricular activities. For the three in-school waves of data collection (when most were eighth-graders, sophomores, or seniors), achievement tests in reading, social studies, mathematics and science were administered in addition to the student questionnaire.
+
+Question: Many middle schoolers say their grades don't matter and they'll work harder in high school. We can answer this question using data from NELS.  For this example we'll operationally define performance as reading achievement.  
+
+Create difference scores between reading achievement scores in 8th and 10th grade for each participant.
+
+```{r}
+educ <- read.csv("http://www3.amherst.edu/~jjeneralczuk/Rintro/NELS.csv")
+educ <- mutate(educ, diff = ACHRDG10 - ACHRDG08); 
+
+favstats (~ACHRDG08, data=educ)
+favstats (~ACHRDG10, data=educ)
+favstats (~diff, data=educ)
+densityplot (~diff, data=educ)
+histogram (~diff, data=educ)
+```
+
+10. Create a confidence interval for the difference and perform the correct hypothesis test - you are back to one - mean t test , with variable diff. Did reading achievement scores differ over time (between 8th and 10th grade)? If so, why? If not, why not?
+
+SOLUTION:
+
+Cannot say they differ. Cannot reject null hypothesis.
+
+
+
+```{r}
+t.test(~diff, data=educ, conf.level = 0.95)
+t.test(~diff, data=educ, conf.level = 0.90)
+```
+
